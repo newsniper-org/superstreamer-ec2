@@ -1,4 +1,4 @@
-SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id "superstreamer-secrets" --query "SecretString" --output text)
+SECRET_JSON=$(sudo aws secretsmanager get-secret-value --secret-id "superstreamer-secrets" --query "SecretString" --output text)
 
 rm -f .env
 touch .env
