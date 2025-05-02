@@ -7,6 +7,7 @@ volumes:
 services:
   superstreamer-api:
     image: "superstreamerapp/api:latest"
+    container_name: superstreamer-api
     restart: always
     ports:
       - "52001:3000"
@@ -16,11 +17,13 @@ services:
     env_file: .env
     environment:
       - REDIS_HOST=superstreamer-redis
+      - REDIS_URI=redis://superstreamer-redis:6379
       - REDIS_PORT=6379
       - DATABASE_URI=postgresql://postgres:sprs@superstreamer-postgres/sprs
 
   superstreamer-app:
     image: "superstreamerapp/app:latest"
+    container_name: superstreamer-app
     ports:
       - "52000:3000"
     environment:
@@ -29,16 +32,19 @@ services:
 
   superstreamer-artisan:
     image: "superstreamerapp/artisan:latest"
+    container_name: superstreamer-artisan
     restart: always
     depends_on:
       - superstreamer-redis
     env_file: .env
     environment:
       - REDIS_HOST=superstreamer-redis
+      - REDIS_URI=redis://superstreamer-redis:6379
       - REDIS_PORT=6379
 
   superstreamer-stitcher:
     image: "superstreamerapp/stitcher:latest"
+    container_name: superstreamer-stitcher
     restart: always
     ports:
       - "52002:3000"
@@ -53,8 +59,10 @@ services:
 
   superstreamer-redis:
     image: redis/redis-stack-server:7.2.0-v6
+    command: ["redis-server", "--bind", "superstreamer-redis", "--port", "6379", "--protected-mode", "no"]
+    container_name: superstreamer-redis
     ports:
-      - "127.0.0.1:6379:6379"
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
     volumes:
@@ -62,6 +70,7 @@ services:
 
   superstreamer-postgres:
     image: "postgres:latest"
+    container_name: superstreamer-postgres
     restart: always
     stop_signal: SIGINT
     ports:
