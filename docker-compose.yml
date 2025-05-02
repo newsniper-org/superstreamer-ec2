@@ -5,6 +5,18 @@ volumes:
   superstreamer_postgres_data:  
 
 services:
+  superstreamer-nginx:
+    image: "nginx:latest"
+    container_name: superstreamer-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - superstreamer-app
+
   superstreamer-api:
     image: "superstreamerapp/api:latest"
     container_name: superstreamer-api
@@ -27,8 +39,8 @@ services:
     ports:
       - "52000:3000"
     environment:
-      - PUBLIC_API_ENDPOINT=http://localhost:52001
-      - PUBLIC_STITCHER_ENDPOINT=http://localhost:52002
+      - PUBLIC_API_ENDPOINT=http://superstreamer-api:52001
+      - PUBLIC_STITCHER_ENDPOINT=http://superstreamer-stitcher:52002
 
   superstreamer-artisan:
     image: "superstreamerapp/artisan:latest"
@@ -54,8 +66,8 @@ services:
     environment:
       - REDIS_PORT=6379
       - REDIS_HOST=superstreamer-redis
-      - PUBLIC_API_ENDPOINT=http://localhost:52001
-      - PUBLIC_STITCHER_ENDPOINT=http://localhost:52002
+      - PUBLIC_API_ENDPOINT=http://superstreamer-api:52001
+      - PUBLIC_STITCHER_ENDPOINT=http://superstreamer-stitcher:52002
 
   superstreamer-redis:
     image: redis/redis-stack-server:7.2.0-v6
